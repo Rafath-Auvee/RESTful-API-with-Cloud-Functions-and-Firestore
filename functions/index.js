@@ -82,4 +82,35 @@ app.get("/api/userDetails", (req, res) => {
   })();
 });
 
+app.put("/api/update/:id", (req, res) => {
+  (async () => {
+    try {
+      const reqDoc = db.collection("userdetails").doc(req.params.id);
+      await reqDoc.update({
+        name: req.body.name,
+        mobile: req.body.mobile,
+        address: req.body.address,
+      });
+      return res.status(200).send({ status: "Success", msg: "Data Updated" });
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({ status: "Failed", msg: error });
+    }
+  })();
+});
+
+
+app.delete("/api/delete/:id", (req, res) => {
+  (async () => {
+    try {
+      const reqDoc = db.collection("userdetails").doc(req.params.id);
+      await reqDoc.delete();
+      return res.status(200).send({ status: "Success", msg: "Data Removed" });
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({ status: "Failed", msg: error });
+    }
+  })();
+});
+
 exports.app = functions.https.onRequest(app);
