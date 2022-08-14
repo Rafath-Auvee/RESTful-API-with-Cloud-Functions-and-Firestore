@@ -20,35 +20,66 @@ app.get("/", (req, res) => {
   return res.status(200).send("Hello World");
 });
 
-app.post("/auvee/api/create", (req, res) => {
+app.post("/api/create", (req, res) => {
   (async () => {
     try {
-      await db.collection("userDetails").doc(`/${Date.now()}/`).create({
+      await db.collection("userdetails").doc(`/${Date.now()}/`).create({
         id: Date.now(),
         name: req.body.name,
         mobile: req.body.mobile,
         address: req.body.address,
       });
+
       return res.status(200).send({ status: "Success", msg: "Data Saved" });
-    } catch (e) {
-      return res.status(500).send({ status: "Failed", msg: e });
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({ status: "Failed", msg: error });
     }
   })();
+});
 
-  app.get("auvee/api/userDetail/:id", (req, res) => {
-    (async () => {
-      try {
-        const reqDoc = db.collection("userdetails").doc(req.params.id);
-        let userDetail = await reqDoc.get();
-        let response = userDetail.data();
-  
-        return res.status(200).send({ status: "Success", data: response });
-      } catch (error) {
-        console.log(error);
-        res.status(500).send({ status: "Failed", msg: error });
-      }
-    })();
-  });)
+app.get("/api/userDetail/:id", (req, res) => {
+  (async () => {
+    try {
+      const reqDoc = db.collection("userdetails").doc(req.params.id);
+      let userDetail = await reqDoc.get();
+      let response = userDetail.data();
+
+      return res.status(200).send({ status: "Success", data: response });
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({ status: "Failed", msg: error });
+    }
+  })();
+});
+
+app.get("/api/userDetails", (req, res) => {
+  (async () => {
+    try {
+      let query = db.collection("userdetails");
+      let response = [];
+
+      await query.get().then((data) => {
+        let docs = data.docs; // query results
+
+        docs.map((doc) => {
+          const selectedData = {
+            name: doc.data().name,
+            mobile: doc.data().mobile,
+            address: doc.data().address,
+          };
+
+          response.push(selectedData);
+        });
+        return response;
+      });
+
+      return res.status(200).send({ status: "Success", data: response });
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({ status: "Failed", msg: error });
+    }
+  })();
 });
 
 exports.app = functions.https.onRequest(app);
