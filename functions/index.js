@@ -14,9 +14,41 @@ admin.initializeApp({
 
 app.use(cors({ origin: true }));
 
+const db = admin.firestore();
+
 app.get("/", (req, res) => {
   return res.status(200).send("Hello World");
+});
 
+app.post("/auvee/api/create", (req, res) => {
+  (async () => {
+    try {
+      await db.collection("userDetails").doc(`/${Date.now()}/`).create({
+        id: Date.now(),
+        name: req.body.name,
+        mobile: req.body.mobile,
+        address: req.body.address,
+      });
+      return res.status(200).send({ status: "Success", msg: "Data Saved" });
+    } catch (e) {
+      return res.status(500).send({ status: "Failed", msg: e });
+    }
+  })();
+
+  app.get("auvee/api/userDetail/:id", (req, res) => {
+    (async () => {
+      try {
+        const reqDoc = db.collection("userdetails").doc(req.params.id);
+        let userDetail = await reqDoc.get();
+        let response = userDetail.data();
+  
+        return res.status(200).send({ status: "Success", data: response });
+      } catch (error) {
+        console.log(error);
+        res.status(500).send({ status: "Failed", msg: error });
+      }
+    })();
+  });)
 });
 
 exports.app = functions.https.onRequest(app);
